@@ -178,7 +178,7 @@ jobs:
           ./build.sh nanopi_r2s.mk
 
        - name: Fix Rootfs Owner and Group
-        run: |
+         run: |
           sudo df -lh
           lodev=$(sudo losetup -f)
           echo "found unused loop dev $lodev"
