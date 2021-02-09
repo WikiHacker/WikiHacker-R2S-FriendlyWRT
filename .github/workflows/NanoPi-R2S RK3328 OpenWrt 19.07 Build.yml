@@ -177,8 +177,8 @@ jobs:
           sed -i 's/set -eu/set -u/' scripts/mk-friendlywrt.sh
           ./build.sh nanopi_r2s.mk
 
-       - name: Fix Rootfs Owner and Group
-         run: |
+      - name: Fix Rootfs Owner and Group
+        run: |
           sudo df -lh
           lodev=$(sudo losetup -f)
           echo "found unused loop dev $lodev"
