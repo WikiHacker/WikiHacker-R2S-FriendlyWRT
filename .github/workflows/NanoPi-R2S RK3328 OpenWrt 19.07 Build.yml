@@ -170,7 +170,7 @@ jobs:
       - name: Custom Configure Files
         run: |
           rm -f code/friendlywrt/.config*
-          cp r2s-rk3328-config code/configs/config_rk3328
+          cp config/r2s-rk3328-config code/configs/config_rk3328
 
       - name: Set Default Values
         run: |
