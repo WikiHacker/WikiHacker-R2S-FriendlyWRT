@@ -31,7 +31,7 @@ jobs:
           sudo apt-get -y install upx-ucl unzip subversion
           sudo apt-get -y purge dotnet* ghc* google* llvm* mysql* php* zulu* firefox hhvm
           sudo apt-get -y autoremove --purge          
-          wget -O - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | bash
+          wget -O - https://raw.githubusercontent.com/friendlyarm/build-env-on-ubuntu-bionic/master/install.sh | sed 's/python-/python3-/g' | /bin/bash
 
       #- name: Setup Debug Session
       #  uses: P3TERX/debugger-action@master
@@ -68,13 +68,14 @@ jobs:
 
           git clone https://github.com/jerrykuku/lua-maxminddb.git
           git clone https://github.com/jerrykuku/luci-app-vssr.git
-          git clone --depth=1 -b master https://github.com/vernesong/OpenClash
+          #git clone --depth=1 -b master https://github.com/vernesong/OpenClash
 
           rm -rf lean/luci-theme-argon
           git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git
 
-          #svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
-          
+          svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
+          # svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
+
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/luci-app-passwall
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/tcping
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/ssocks
@@ -84,6 +85,7 @@ jobs:
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/brook
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/chinadns-ng
           svn co https://github.com/xiaorouji/openwrt-passwall/trunk/xray-core
+          svn co https://github.com/xiaorouji/openwrt-passwall/trunk/xray-plugin
           
           svn co https://github.com/songchenwen/nanopi-r2s/trunk/luci-app-r2sflasher
           
@@ -91,7 +93,7 @@ jobs:
           svn co https://github.com/pymumu/luci-app-smartdns/branches/lede luci-app-smartdns
           
           svn co https://github.com/lisaac/luci-app-dockerman/trunk/applications/luci-app-dockerman
-          
+
           git clone https://github.com/jerrykuku/luci-app-jd-dailybonus.git
           git clone https://github.com/NateLol/luci-app-oled
         
@@ -100,7 +102,7 @@ jobs:
           cd code/friendlywrt/package/base-files/files
           mkdir -p etc/openclash/core
           # for updates, go to: https://github.com/Dreamacro/clash/releases
-          wget -qO- https://github.com/Dreamacro/clash/releases/download/v1.3.5/clash-linux-armv8-v1.3.5.gz | gunzip -c > etc/openclash/core/clash
+          wget -qO- https://github.com/Dreamacro/clash/releases/download/v1.4.1/clash-linux-armv8-v1.4.1.gz | gunzip -c > etc/openclash/core/clash
           # for updates, go to: https://github.com/vernesong/OpenClash/releases/tag/TUN-Premium
           wget -qO- https://github.com/vernesong/OpenClash/releases/download/TUN-Premium/clash-linux-armv8-2021.02.21.gz | gunzip -c > etc/openclash/core/clash_tun
           # for updates, go to: https://github.com/vernesong/OpenClash/releases/tag/TUN
@@ -120,40 +122,46 @@ jobs:
 
       - name: Install Mods
         run: |
-          cd code/friendlywrt
+          cd code
 
-          rm -rf feeds/packages/libs/libcap
-          svn co https://github.com/openwrt/packages/trunk/libs/libcap feeds/packages/libs/libcap
+          rm -rf friendlywrt/feeds/packages/libs/libcap
+          svn co https://github.com/openwrt/packages/trunk/libs/libcap friendlywrt/feeds/packages/libs/libcap
           
-          rm -rf package/feeds/packages/netdata
-          svn co https://github.com/openwrt/packages/trunk/admin/netdata package/feeds/packages/netdata
+          rm -rf friendlywrt/package/feeds/packages/netdata
+          svn co https://github.com/openwrt/packages/trunk/admin/netdata friendlywrt/package/feeds/packages/netdata
 
-          rm -rf feeds/packages/libs/libnatpmp
-          svn co https://github.com/coolsnowwolf/packages/trunk/libs/libnatpmp feeds/packages/libs/libnatpmp
+          rm -rf friendlywrt/feeds/packages/libs/libnatpmp
+          svn co https://github.com/coolsnowwolf/packages/trunk/libs/libnatpmp friendlywrt/feeds/packages/libs/libnatpmp
           
-          rm -rf feeds/packages/lang/luasec
-          svn co https://github.com/coolsnowwolf/packages/trunk/lang/luasec feeds/packages/lang/luasec
+          rm -rf friendlywrt/feeds/packages/lang/luasec
+          svn co https://github.com/coolsnowwolf/packages/trunk/lang/luasec friendlywrt/feeds/packages/lang/luasec
 
-          sed -i '/STAMP_BUILT/d' feeds/packages/utils/runc/Makefile
-          sed -i '/STAMP_BUILT/d' feeds/packages/utils/containerd/Makefile
+          sed -i '/STAMP_BUILT/d' friendlywrt/feeds/packages/utils/runc/Makefile
+          sed -i '/STAMP_BUILT/d' friendlywrt/feeds/packages/utils/containerd/Makefile
           
-          sed -i '/upx/d' package/lean/frp/Makefile
-          sed -i '/upx/d' package/lean/UnblockNeteaseMusicGo/Makefile
+          sed -i '/upx/d' friendlywrt/package/lean/frp/Makefile
+          sed -i '/upx/d' friendlywrt/package/lean/UnblockNeteaseMusicGo/Makefile
+          sed -i '/upx/d' friendlywrt/package/trojan-go/Makefile
           
-          wget -O package/kernel/kmod-sched-cake/Makefile https://raw.githubusercontent.com/coolsnowwolf/lede/master/package/kernel/kmod-sched-cake-oot/Makefile
-          wget -O feeds/packages/libs/libxml2/Makefile https://raw.githubusercontent.com/coolsnowwolf/packages/master/libs/libxml2/Makefile
+          wget -O friendlywrt/package/kernel/kmod-sched-cake/Makefile https://raw.githubusercontent.com/coolsnowwolf/lede/master/package/kernel/kmod-sched-cake-oot/Makefile
+          wget -O friendlywrt/feeds/packages/libs/libxml2/Makefile https://raw.githubusercontent.com/coolsnowwolf/packages/master/libs/libxml2/Makefile
 
-          sed -i "/redirect_https/d" package/network/services/uhttpd/files/uhttpd.config
-          sed -i '/Load Average/i\\t\t<tr><td width="33%"><%:Telegram%></td><td><a href="https://t.me/wikimao"><%:WikiHackers%></a></td></tr>' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-          sed -i '/Load Average/i\\t\t<tr><td width="33%"><%:CPU Temperature%></td><td><%=luci.sys.exec("cut -c1-2 /sys/class/thermal/thermal_zone0/temp")%><span>&#8451;</span></td></tr>' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-          sed -i 's/pcdata(boardinfo.system or "?")/"ARMv8"/' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-          sed -i 's/services/vpn/g' package/feeds/luci/luci-app-openvpn/luasrc/controller/openvpn.lua
-          sed -i 's/resolv.conf.d\/resolv.conf.auto/resolv.conf.auto/g' package/lean/luci-app-flowoffload/root/etc/init.d/flowoffload
-          
-          sed -i '/done/imkfs.ext4 \/dev\/mmcblk0p2 && mkdir \/mnt\/mmcblk0p2 && mount \/dev\/mmcblk0p2 \/mnt\/mmcblk0p2 && mount \/dev\/mmcblk0p2 \/opt && mkdir \/opt\/docker\n' package/base-files/files/root/setup.sh
-          sed -i '/done/i[ -f \/etc\/init.d\/dockerd ] && \/etc\/init.d\/dockerd restart\n' package/base-files/files/root/setup.sh
-          sed -i 's/\/root/\/mnt\/mmcblk0p2/g' package/luci-app-r2sflasher/root/usr/bin/rom_flash
+          sed -i "/redirect_https/d" friendlywrt/package/network/services/uhttpd/files/uhttpd.config
+          sed -i 's/services/vpn/g' friendlywrt/package/feeds/luci/luci-app-openvpn/luasrc/controller/openvpn.lua
+          sed -i 's/resolv.conf.d\/resolv.conf.auto/resolv.conf.auto/g' friendlywrt/package/lean/luci-app-flowoffload/root/etc/init.d/flowoffload
+       
+          sed -i '/done/imkfs.ext4 /dev/mmcblk0p2 && mkdir /mnt/mmcblk0p2 && mount /dev/mmcblk0p2 /mnt/mmcblk0p2 && mkdir /mnt/mmcblk0p2/docker\n' friendlywrt/package/base-files/files/root/setup.sh
+          sed -i "/done/iblock detect | sed \"s/enabled\\\t'0'/enabled\\\t'1'/\" > /etc/config/fstab\n" friendlywrt/package/base-files/files/root/setup.sh
+          sed -i '/done/i[ -f /etc/init.d/dockerman ] && /etc/init.d/dockerman restart\n' friendlywrt/package/base-files/files/root/setup.sh
 
+         # sed -i '/done/imkfs.ext4 \/dev\/mmcblk0p2 && mkdir \/mnt\/mmcblk0p2 && mount \/dev\/mmcblk0p2 \/mnt\/mmcblk0p2 && mount \/dev\/mmcblk0p2 \/opt\n' ./friendlywrt/package/base-files/files/root/setup.sh
+         # sed -i 's/\/root/\/mnt\/mmcblk0p2/g' ./friendlywrt/package/luci-app-r2sflasher/root/usr/bin/rom_flash
+      - name: MOD index file
+        run: |
+          cd code/friendlywrt/feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status
+          sed -i '/Load Average/i\\t\t<tr><td width="33%"><%:Telegram%></td><td><a href="https://t.me/wikimao"><%:WikiHackers%></a></td></tr>' index.htm
+          sed -i '/Load Average/i\\t\t<tr><td width="33%"><%:CPU Temperature%></td><td><%=luci.sys.exec("cut -c1-2 /sys/class/thermal/thermal_zone0/temp")%><span>&#8451;</span></td></tr>' index.htm
+          
       - name: Patch Kernel
         run: |
           cd code/kernel/
@@ -162,7 +170,7 @@ jobs:
       - name: Custom Configure Files
         run: |
           rm -f code/friendlywrt/.config*
-          cp config/r2s-rk3328-config code/configs/config_rk3328
+          cp r2s-rk3328-config code/configs/config_rk3328
 
       - name: Set Default Values
         run: |
@@ -179,28 +187,22 @@ jobs:
           sed -i 's/set -eu/set -u/' scripts/mk-friendlywrt.sh
           ./build.sh nanopi_r2s.mk
 
-      # - name: Fix Rootfs Owner and Group
-      #   run: |
-      #     sudo df -lh
-      #     lodev=$(sudo losetup -f)
-      #     echo "found unused loop dev $lodev"
-      #     sudo losetup -o 100663296 $lodev code/out/*.img
-      #     sudo rm -rf /mnt/friendlywrt-tmp
-      #     sudo mkdir -p /mnt/friendlywrt-tmp
-      #     sudo mount $lodev /mnt/friendlywrt-tmp
-      #     sudo chown -R root:root /mnt/friendlywrt-tmp
-      #     sudo umount /mnt/friendlywrt-tmp
-      #     sudo losetup -d $lodev
+      - name: Fix Rootfs Owner and Group
+        run: |
+          lodev=$(sudo losetup -P -f --show code/out/*.img)
+          sudo rm -rf /mnt/friendlywrt-tmp
+          sudo mkdir -p /mnt/friendlywrt-tmp
+          sudo mount "$lodev""p8" /mnt/friendlywrt-tmp
+          sudo chown -R root:root /mnt/friendlywrt-tmp
+          sudo umount /mnt/friendlywrt-tmp
+          sudo losetup -d $lodev
 
       - name: Assemble Artifact
         run: |
           rm -rf ./artifact/
           mkdir -p ./artifact/
 
-          #find code/out/ -name "FriendlyWrt_*img" | xargs -I{} sh -c 'f=$(basename $1); zip -r -j "./artifact/${f}.zip" $1' sh {} \;
           cp code/out/*.img.zip ./artifact/
-          #find code/friendlywrt/bin/targets/rockchip-rk3328/generic -name "openwrt*-squashfs.img" | xargs -I{} sh -c 'f=$(basename $1); zip -r -j "./artifact/${f}.zip" $1' sh {} \;
-          
           cp code/friendlywrt/.config ./artifact/
 
       - name: Upload Artifact
@@ -215,7 +217,7 @@ jobs:
         with:
           name: FriendlyWrt_NanoPi-R2S RK3328 v19.07
           allowUpdates: true
-          tag: R2S20210223
+          tag: R2S20210306
           commit: main
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
